@@ -62,6 +62,7 @@ class AudioRecorderController: UIViewController {
         timeSlider.minimumValue = 0
         timeSlider.maximumValue = Float(duration)
         timeSlider.value = Float(currentTime)
+        recordButton.isSelected = isRecording
     }
     
     
@@ -146,11 +147,20 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Recording
     
+    var audioRecorder: AVAudioRecorder?
+    var recordingURL: URL?
+    
+    var isRecording: Bool {
+        audioRecorder?.isRecording ?? false
+    }
+    
+    
     func createNewRecordingURL() -> URL {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         
         let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: .withInternetDateTime)
         let file = documents.appendingPathComponent(name, isDirectory: false).appendingPathExtension("caf")
+        //CAF Stands for CoreAudioFile
         
         print("recording URL: \(file)")
         
@@ -191,11 +201,20 @@ class AudioRecorderController: UIViewController {
     */
     
     func startRecording() {
+        let recordingURL = createNewRecordingURL()
         
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
+        audioRecorder = try? AVAudioRecorder(url: recordingURL, format: format)
+        audioRecorder?.delegate = self
+        
+        audioRecorder?.record()
+        self.recordingURL = recordingURL
+        updateViews()
     }
     
     func stopRecording() {
-        
+        audioRecorder?.stop()
+        updateViews()
     }
     
     // MARK: - Actions
@@ -218,7 +237,11 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
-        
+        if isRecording {
+            stopRecording()
+        } else {
+            startRecording()
+        }
     }
 }
 
@@ -231,6 +254,22 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let error = error {
             print("Audio Player Error: \(error)")
+        }
+        updateViews()
+    }
+}
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        if flag,
+            let recordingURL = recordingURL {
+            audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL)
+        }
+        updateViews()
+    }
+    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        if let error = error {
+            print("Audio Record Error: \(error)")
         }
         updateViews()
     }
