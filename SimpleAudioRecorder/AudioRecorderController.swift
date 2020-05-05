@@ -167,7 +167,7 @@ class AudioRecorderController: UIViewController {
         return file
     }
     
-    /*
+    
     func requestPermissionOrStartRecording() {
         switch AVAudioSession.sharedInstance().recordPermission {
         case .undetermined:
@@ -198,7 +198,7 @@ class AudioRecorderController: UIViewController {
             break
         }
     }
-    */
+    
     
     func startRecording() {
         let recordingURL = createNewRecordingURL()
@@ -240,7 +240,7 @@ class AudioRecorderController: UIViewController {
         if isRecording {
             stopRecording()
         } else {
-            startRecording()
+            requestPermissionOrStartRecording()
         }
     }
 }
