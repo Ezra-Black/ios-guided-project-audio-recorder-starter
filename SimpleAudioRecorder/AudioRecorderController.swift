@@ -86,7 +86,12 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
-    var audioPlayer: AVAudioPlayer?
+    var audioPlayer: AVAudioPlayer? {
+        didSet {
+            //Using a didSet allows us to make sure we dont forget to set the delegate
+            audioPlayer?.delegate = self
+        }
+    }
     
     var isPlaying: Bool {
         audioPlayer?.isPlaying ?? false
@@ -128,7 +133,7 @@ class AudioRecorderController: UIViewController {
         let name = ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: .withInternetDateTime)
         let file = documents.appendingPathComponent(name, isDirectory: false).appendingPathExtension("caf")
         
-//        print("recording URL: \(file)")
+        print("recording URL: \(file)")
         
         return file
     }
@@ -190,6 +195,20 @@ class AudioRecorderController: UIViewController {
     
     @IBAction func toggleRecording(_ sender: Any) {
         
+    }
+}
+
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        updateViews()
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print("Audio Player Error: \(error)")
+        }
+        updateViews()
     }
 }
 
