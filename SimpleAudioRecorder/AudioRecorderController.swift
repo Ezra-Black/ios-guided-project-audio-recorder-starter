@@ -42,16 +42,29 @@ class AudioRecorderController: UIViewController {
                                                                    weight: .regular)
         
         loadAudio()
+        updateViews()
     }
     
     private func updateViews() {
         playButton.isSelected = isPlaying
+        
+        let currentTime = audioPlayer?.currentTime ?? 0.0
+        let duration = audioPlayer?.duration ?? 0
+        let timeRemaining = round(duration) - currentTime
+        
+        timeElapsedLabel.text = timeIntervalFormatter.string(from: currentTime) ?? "00:00"
+        timeRemainingLabel.text = "-" + (timeIntervalFormatter.string(from: timeRemaining) ?? "00:00")
+        
+        timeSlider.minimumValue = 0
+        timeSlider.maximumValue = Float(duration)
+        timeSlider.value = Float(currentTime)
     }
     
     
     // MARK: - Timer
     
-    /*
+    var timer: Timer?
+    
     func startTimer() {
         timer?.invalidate()
         
@@ -60,20 +73,20 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-            if let audioRecorder = self.audioRecorder,
-                self.isRecording == true {
-                
-                audioRecorder.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-                
-            }
-            
-            if let audioPlayer = self.audioPlayer,
-                self.isPlaying == true {
-            
-                audioPlayer.updateMeters()
-                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
-            }
+//            if let audioRecorder = self.audioRecorder,
+//                self.isRecording == true {
+//
+//                audioRecorder.updateMeters()
+//                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+//
+//            }
+//
+//            if let audioPlayer = self.audioPlayer,
+//                self.isPlaying == true {
+//
+//                audioPlayer.updateMeters()
+//                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
+//            }
         }
     }
     
@@ -81,7 +94,7 @@ class AudioRecorderController: UIViewController {
         timer?.invalidate()
         timer = nil
     }
-    */
+    
     
     
     // MARK: - Playback
@@ -116,11 +129,13 @@ class AudioRecorderController: UIViewController {
     
     func play() {
         audioPlayer?.play()
+        startTimer()
         updateViews()
     }
     
     func pause() {
         audioPlayer?.pause()
+        cancelTimer()
         updateViews()
     }
     
