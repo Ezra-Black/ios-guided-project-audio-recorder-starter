@@ -43,6 +43,7 @@ class AudioRecorderController: UIViewController {
         
         loadAudio()
         updateViews()
+        try? prepareAudioSession()
     }
     
     deinit {
@@ -124,13 +125,13 @@ class AudioRecorderController: UIViewController {
         
     }
     
-    /*
+    //makes us the main audio source
     func prepareAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
         try session.setActive(true, options: []) // can fail if on a phone call, for instance
     }
-    */
+    
     
     func play() {
         audioPlayer?.play()
