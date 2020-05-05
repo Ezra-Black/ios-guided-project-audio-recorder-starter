@@ -45,6 +45,10 @@ class AudioRecorderController: UIViewController {
         updateViews()
     }
     
+    deinit {
+        cancelTimer()
+    }
+    
     private func updateViews() {
         playButton.isSelected = isPlaying
         
