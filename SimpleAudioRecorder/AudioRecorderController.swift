@@ -79,20 +79,20 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-//            if let audioRecorder = self.audioRecorder,
-//                self.isRecording == true {
-//
-//                audioRecorder.updateMeters()
-//                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-//
-//            }
-//
-//            if let audioPlayer = self.audioPlayer,
-//                self.isPlaying == true {
-//
-//                audioPlayer.updateMeters()
-//                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
-//            }
+            if let audioRecorder = self.audioRecorder,
+                self.isRecording == true {
+
+                audioRecorder.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+
+            }
+
+            if let audioPlayer = self.audioPlayer,
+                self.isPlaying == true {
+
+                audioPlayer.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioPlayer.averagePower(forChannel: 0))
+            }
         }
     }
     
@@ -109,6 +109,7 @@ class AudioRecorderController: UIViewController {
         didSet {
             //Using a didSet allows us to make sure we dont forget to set the delegate
             audioPlayer?.delegate = self
+            audioPlayer?.isMeteringEnabled = true
         }
     }
     
@@ -207,15 +208,18 @@ class AudioRecorderController: UIViewController {
         let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
         audioRecorder = try? AVAudioRecorder(url: recordingURL, format: format)
         audioRecorder?.delegate = self
-        
+        audioRecorder?.isMeteringEnabled = true
         audioRecorder?.record()
         self.recordingURL = recordingURL
         updateViews()
+        
+        startTimer()
     }
     
     func stopRecording() {
         audioRecorder?.stop()
         updateViews()
+        cancelTimer()
     }
     
     // MARK: - Actions
